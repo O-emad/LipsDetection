@@ -317,7 +317,7 @@ namespace AzureCognitiveServices.Client
             //var jpg = frame.Image.ToMemoryStream(".jpg", s_jpegParams);
             var localFaces = (OpenCvSharp.Rect[])frame.UserData;
             var faces = new List<FaceAPI.Models.DetectedFace>();
-            if (localFaces == null || localFaces.Length > 0)
+            if (localFaces != null && localFaces.Length > 0)
             {
 
 

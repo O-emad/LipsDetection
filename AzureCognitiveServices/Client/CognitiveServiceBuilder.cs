@@ -52,14 +52,24 @@ namespace AzureCognitiveServices.Client
                     OutputArray outputArray = OutputArray.Create(new Mat());
                     Cv2.CvtColor(intputArray,outputArray,ColorConversionCodes.BGR2GRAY);
                     var image = outputArray.GetMat();
-                    var rects = Service.LocalFaceDetector.DetectMultiScale(image,1.05,5,OpenCvSharp.HaarDetectionTypes.ScaleImage,new Size(100,100));
-                    foreach (var face in rects)
+                    var rects = Service.LocalFaceDetector.DetectMultiScale(image,1.05,5, HaarDetectionTypes.DoRoughSearch | HaarDetectionTypes.FindBiggestObject, new Size(100,100));
+                    if(rects.Length > 0)
                     {
-                       // var faceROI = outputArray.
+
+                         Rect? _face = rects.OrderByDescending(f => f.Width).FirstOrDefault();
+                        if (_face is not null)
+                        {
+                            Rect[] faces = new Rect[] { _face.Value };
+                            e.Frame.UserData = faces;
+                        }
+                            
                     }
-                    //var rects = Service.SmileDetector.DetectMultiScale(e.Frame.Image, 1.1, 10, OpenCvSharp.HaarDetectionTypes.ScaleImage, new OpenCvSharp.Size(15, 15));
+                    else
+                    {
+                        e.Frame.UserData=null;
+                    }
                     // Attach faces to frame. 
-                    e.Frame.UserData = rects;
+                    
                 }
                 
                 // The callback may occur on a different thread, so we must use the
