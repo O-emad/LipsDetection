@@ -49,17 +49,22 @@ namespace AzureCognitiveServices.Client
                 {
                     // Local face detection. 
                     var intputArray = InputArray.Create(e.Frame.Image);
-                    OutputArray outputArray = OutputArray.Create(new Mat());
-                    Cv2.CvtColor(intputArray,outputArray,ColorConversionCodes.BGR2GRAY);
-                    var image = outputArray.GetMat();
+                    var image = e.Frame.Image.CvtColor(ColorConversionCodes.BGR2GRAY);
+                    //OutputArray outputArray = OutputArray.Create(new Mat());
+                    //Cv2.CvtColor(intputArray,outputArray,ColorConversionCodes.BGR2GRAY);
+                    //var image = outputArray.GetMat();
                     var rects = Service.LocalFaceDetector.DetectMultiScale(image,1.05,5,OpenCvSharp.HaarDetectionTypes.ScaleImage,new Size(100,100));
+                    var smiles = new List<Rect>();
                     foreach (var face in rects)
                     {
-                       // var faceROI = outputArray.
+                        var faceROI = image.SubMat(face);
+                        var smileRect = Service.SmileDetector.DetectMultiScale(faceROI, 1.1, 10, OpenCvSharp.HaarDetectionTypes.ScaleImage, new OpenCvSharp.Size(15, 15));
+                        smiles.AddRange(smileRect);
+                        // var faceROI = outputArray.
                     }
                     //var rects = Service.SmileDetector.DetectMultiScale(e.Frame.Image, 1.1, 10, OpenCvSharp.HaarDetectionTypes.ScaleImage, new OpenCvSharp.Size(15, 15));
-                    // Attach faces to frame. 
-                    e.Frame.UserData = rects;
+                    // Attach faces to frame.
+                    e.Frame.UserData = smiles.ToArray();
                 }
                 
                 // The callback may occur on a different thread, so we must use the
