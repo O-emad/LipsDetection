@@ -53,18 +53,37 @@ namespace AzureCognitiveServices.Client
                     //OutputArray outputArray = OutputArray.Create(new Mat());
                     //Cv2.CvtColor(intputArray,outputArray,ColorConversionCodes.BGR2GRAY);
                     //var image = outputArray.GetMat();
-                    var rects = Service.LocalFaceDetector.DetectMultiScale(image,1.05,5,OpenCvSharp.HaarDetectionTypes.ScaleImage,new Size(100,100));
-                    var smiles = new List<Rect>();
-                    foreach (var face in rects)
+                    var rects = Service.LocalFaceDetector.DetectMultiScale(image,1.05,5,HaarDetectionTypes.DoRoughSearch|HaarDetectionTypes.FindBiggestObject,new Size(100,100));
+                    if (rects.Length > 0)
                     {
-                        var faceROI = image.SubMat(face);
-                        var smileRect = Service.SmileDetector.DetectMultiScale(faceROI, 1.1, 10, OpenCvSharp.HaarDetectionTypes.ScaleImage, new OpenCvSharp.Size(15, 15));
-                        smiles.AddRange(smileRect);
-                        // var faceROI = outputArray.
+                        var smiles = new List<Rect>();
+                        Rect? _face = rects.OrderByDescending(f => f.Width).FirstOrDefault();
+                        if (_face is not null)
+                        {
+                            var face = _face.Value;
+                            var faceROI = image.SubMat(face);
+                            var smileRect = Service.SmileDetector.DetectMultiScale(faceROI, 1.1, 10, HaarDetectionTypes.DoRoughSearch | HaarDetectionTypes.FindBiggestObject, new OpenCvSharp.Size(15, 15));
+                            Rect? _smile = smileRect.OrderByDescending(s => s.Width).FirstOrDefault();
+                            if (_smile is not null)
+                            {
+                                var smile = _smile.Value;
+                                if (smile.Width > 0 && smile.Height > 0)
+                                {
+                                    smile.Left += face.Left;
+                                    smile.Top += face.Top;
+                                    smiles.Add(smile);
+                                }
+                            }
+                            smiles.Add(face);
+                        }
+                        
+                        // Attach faces to frame.
+                        e.Frame.UserData = smiles.ToArray();
                     }
-                    //var rects = Service.SmileDetector.DetectMultiScale(e.Frame.Image, 1.1, 10, OpenCvSharp.HaarDetectionTypes.ScaleImage, new OpenCvSharp.Size(15, 15));
-                    // Attach faces to frame.
-                    e.Frame.UserData = smiles.ToArray();
+                    else
+                    {
+                        e.Frame.UserData = null;
+                    }
                 }
                 
                 // The callback may occur on a different thread, so we must use the
@@ -124,7 +143,7 @@ namespace AzureCognitiveServices.Client
             };
 
             // Create local face detector. 
-            _ = Service.LocalFaceDetector.Load(@"Data/haarcascade_frontalface_default.xml");
+            _ = Service.LocalFaceDetector.Load(@"Data/haarcascade_frontalface_alt2.xml");
             _ = Service.SmileDetector.Load(@"Data/haarcascade_smile.xml");
 
 

@@ -317,7 +317,7 @@ namespace AzureCognitiveServices.Client
             //var jpg = frame.Image.ToMemoryStream(".jpg", s_jpegParams);
             var localFaces = (OpenCvSharp.Rect[])frame.UserData;
             var faces = new List<FaceAPI.Models.DetectedFace>();
-            if (localFaces == null || localFaces.Length > 0)
+            if (localFaces is not null && localFaces.Length > 0)
             {
 
 
@@ -325,18 +325,19 @@ namespace AzureCognitiveServices.Client
                     {
                     //if (face.Width >= 100 && face.Height >= 100 && face.Width <= 300 && face.Height <= 300)
                     //{
-                        double mouthLeftCoordinateX = face.Left + (face.Width / 3.0);
-                        double mouthRightCoordinateX = face.Right - (face.Width / 3.0);
-                        double mouthLeftCoordinateY = face.Bottom - (face.Height / 2.8);
-                        double mouthRightCoordinateY = mouthLeftCoordinateY;
+                        //double mouthLeftCoordinateX = face.Left + (face.Width / 3.0);
+                        //double mouthRightCoordinateX = face.Right - (face.Width / 3.0);
+                        //double mouthLeftCoordinateY = face.Bottom - (face.Height / 2.8);
+                        //double mouthRightCoordinateY = mouthLeftCoordinateY;
                         var faceModel = new FaceAPI.Models.DetectedFace()
                         {
                             FaceRectangle = new FaceRectangle(face.Width, face.Height, face.Left, face.Right),
                             FaceId = Guid.NewGuid(),
                             RecognitionModel = RecognitionModel.Recognition01,
                             FaceAttributes = new FaceAttributes(),
-                            FaceLandmarks = new FaceLandmarks(mouthLeft: new Coordinate(mouthLeftCoordinateX, mouthLeftCoordinateY),
-                            mouthRight: new Coordinate(mouthRightCoordinateX, mouthRightCoordinateY))
+                            FaceLandmarks = new FaceLandmarks()
+                            //FaceLandmarks = new FaceLandmarks(mouthLeft: new Coordinate(mouthLeftCoordinateX, mouthLeftCoordinateY),
+                            //mouthRight: new Coordinate(mouthRightCoordinateX, mouthRightCoordinateY))
                         };
 
                         faces.Add(faceModel);
