@@ -31,6 +31,11 @@ namespace AzureCognitiveServices.Client
             Service.HttpConnectionConfiguration = builder.Build();
             return this;
         }
+        public CognitiveServiceBuilder EnableResultOverlay()
+        {
+            Service.DrawResult = true;
+            return this;
+        }
 
         public CognitiveService Build(Dispatcher dispatcher)
         {
@@ -61,6 +66,7 @@ namespace AzureCognitiveServices.Client
                         {
                             Rect[] faces = new Rect[] { _face.Value };
                             e.Frame.UserData = faces;
+                            
                         }
                             
                     }
@@ -77,7 +83,8 @@ namespace AzureCognitiveServices.Client
                 _ = dispatcher.BeginInvoke((Action)(() =>
                 {
                     // Display the image in the left pane.
-                    Service.LeftImage.Source = e.Frame.Image.ToBitmapSource();
+                    if(Service.LeftImage is not null)
+                        Service.LeftImage.Source = e.Frame.Image.ToBitmapSource();
 
                     // If we're fusing client-side face detection with remote analysis, show the
                     // new frame now with the most recent analysis available. 
@@ -117,11 +124,13 @@ namespace AzureCognitiveServices.Client
                     }
                     else
                     {
-                        Service.LatestResultsToDisplay = e.Analysis;
+                        Service.LatestResultsToDisplay.Copy(e.Analysis);
+
 
                         // Display the image and visualization in the right pane. 
                         if (!Service.FuseClientRemoteResults)
                         {
+                            
                             Service.RightImage.Source = Service.VisualizeResult(e.Frame);
                         }
                     }

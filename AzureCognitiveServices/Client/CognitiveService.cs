@@ -34,7 +34,7 @@ namespace AzureCognitiveServices.Client
         public bool FuseClientRemoteResults { get; private set; }
 
         
-        internal LiveCameraResult LatestResultsToDisplay { get; set; } = null;
+        public LiveCameraResult LatestResultsToDisplay { get; internal set; } = new LiveCameraResult();
         /// <summary>
         /// api connection configuration
         /// </summary>
@@ -55,6 +55,14 @@ namespace AzureCognitiveServices.Client
         /// how often to trigger analysis
         /// </summary>
         public TimeSpan AnalyzeInterval { get; private set; } = TimeSpan.FromSeconds(1);
+        /// <summary>
+        /// if set to true the bounding rectangles will be overlayed on the right image
+        /// </summary>
+        public bool DrawResult { get; set; }
+        /// <summary>
+        /// 
+        /// </summary>
+        public ObservableFrameResult FrameResult { get; set; }
         /// <summary>
         /// the unprocessed image to view, in case of not using it, register in to a hidden view
         /// </summary>
@@ -93,7 +101,8 @@ namespace AzureCognitiveServices.Client
             Emotions,
             Tags,
             Recognition,
-            LocalDetection
+            LocalDetection,
+            Stream
         }
 
         /// <summary>
@@ -120,9 +129,12 @@ namespace AzureCognitiveServices.Client
                     // results (computed on the older frame) that we want to display. 
                     MatchAndReplaceFaceRectangles(result.Faces, clientFaces);
                 }
+                if (DrawResult)
+                {
+                    visImage = Visualization.DrawFaces(visImage, result.Faces, result.CelebrityNames);
+                    visImage = Visualization.DrawTags(visImage, result.Tags);
+                }
 
-                visImage = Visualization.DrawFaces(visImage, result.Faces, result.CelebrityNames);
-                visImage = Visualization.DrawTags(visImage, result.Tags);
             }
 
             return visImage;
@@ -338,7 +350,7 @@ namespace AzureCognitiveServices.Client
                             FaceLandmarks = new FaceLandmarks(mouthLeft: new Coordinate(mouthLeftCoordinateX, mouthLeftCoordinateY),
                             mouthRight: new Coordinate(mouthRightCoordinateX, mouthRightCoordinateY))
                         };
-
+                    
                         faces.Add(faceModel);
                    // }
                     }
@@ -352,6 +364,13 @@ namespace AzureCognitiveServices.Client
             };
         }
 
+        private async Task<LiveCameraResult> StreamFunction(VideoFrame frame)
+        {
+            return new LiveCameraResult()
+            {
+
+            };
+        }
         /// <summary>
         ///intializes a group with the given id and name, this group contains the model to be trained to recognize faces from given training samples
         ///*IMPORTANT* don't intialize in the MainWindow constructor
@@ -452,6 +471,10 @@ namespace AzureCognitiveServices.Client
                 case AppMode.LocalDetection:
                     Grabber.AnalysisFunction = LocalFaceDetectionFunction;
                     FuseClientRemoteResults = fuseRemoteClientResults;
+                    break;
+                case AppMode.Stream:
+                    Grabber.AnalysisFunction = StreamFunction;
+                    FuseClientRemoteResults= fuseRemoteClientResults;
                     break;
                 default:
                     Grabber.AnalysisFunction = null;
