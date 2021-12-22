@@ -83,14 +83,25 @@ namespace AzureCognitiveServices.Client
                 _ = dispatcher.BeginInvoke((Action)(() =>
                 {
                     // Display the image in the left pane.
-                    if(Service.LeftImage is not null)
-                        Service.LeftImage.Source = e.Frame.Image.ToBitmapSource();
-
+                    if (Service.UnProcessedImageControls is not null && Service.UnProcessedImageControls.Count > 0)
+                    {
+                        foreach (var imageControl in Service.UnProcessedImageControls)
+                        {
+                            imageControl.Source = e.Frame.Image.ToBitmapSource();
+                        }
+                    }
                     // If we're fusing client-side face detection with remote analysis, show the
                     // new frame now with the most recent analysis available. 
                     if (Service.FuseClientRemoteResults)
                     {
-                        Service.RightImage.Source = Service.VisualizeResult(e.Frame);
+                        if(Service.ProcessedImageControls is not null && Service.ProcessedImageControls.Count > 0)
+                        {
+                            foreach (var imageControl in Service.ProcessedImageControls)
+                            {
+                                imageControl.Source = Service.VisualizeResult(e.Frame);
+                            }
+                        }
+                        
                     }
                 }));
 
@@ -130,8 +141,14 @@ namespace AzureCognitiveServices.Client
                         // Display the image and visualization in the right pane. 
                         if (!Service.FuseClientRemoteResults)
                         {
+                            if(Service.ProcessedImageControls is not null && Service.ProcessedImageControls.Count > 0)
+                            {
+                                foreach (var imageControl in Service.ProcessedImageControls)
+                                {
+                                    imageControl.Source = Service.VisualizeResult(e.Frame);
+                                }
+                            }
                             
-                            Service.RightImage.Source = Service.VisualizeResult(e.Frame);
                         }
                     }
                 }));

@@ -66,11 +66,11 @@ namespace AzureCognitiveServices.Client
         /// <summary>
         /// the unprocessed image to view, in case of not using it, register in to a hidden view
         /// </summary>
-        public Image LeftImage { get; set; }
+        public List<Image> UnProcessedImageControls { get; set; } = new List<Image>();
         /// <summary>
         /// the processed image
         /// </summary>
-        public Image RightImage { get; set; }
+        public List<Image> ProcessedImageControls { get; set; } = new List<Image>();
         /// <summary>
         /// a message area to view the response messages
         /// </summary>

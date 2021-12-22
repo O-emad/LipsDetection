@@ -42,10 +42,17 @@
                     <ColumnDefinition Width="*" />
                     <ColumnDefinition Width="*" />
                 </Grid.ColumnDefinitions>
-                <Image x:Name="LeftImage" Grid.Column="0" Margin="5" />
-                <Image x:Name="RightImage" Grid.Column="1" Margin="5" Panel.ZIndex="1" />
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+                <Image x:Name="TopLeftImage" Grid.Row="0" Grid.Column="0" Margin="5" />
+                <Image x:Name="TopRightImage" Grid.Row="0" Grid.Column="1" Margin="5" Panel.ZIndex="1" />
+                <Image x:Name="BottomLeftImage" Grid.Row="1" Grid.Column="0" Margin="5" />
+                <Image x:Name="BottomRightImage" Grid.Row="1" Grid.Column="1" Margin="5" Panel.ZIndex="1" />
             </Grid>
             <TextBlock Name="MessageArea" Margin="5" Grid.Row="2" VerticalAlignment="Center" Foreground="Aqua" />
+            <TextBlock Name="MessageArea2" Margin="5" Grid.Row="2" VerticalAlignment="Center" HorizontalAlignment="Right" Foreground="red" />
         </Grid>
     </Viewbox>
 </Window>

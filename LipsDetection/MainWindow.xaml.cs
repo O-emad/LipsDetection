@@ -40,20 +40,27 @@ namespace LipsDetection
             //register them to the services following properties. 
             Service.MessageArea = MessageArea;
             //Service.LeftImage = null;
-            Service.RightImage = RightImage;
-
+            Service.ProcessedImageControls.Add(TopLeftImage);
+            Service.UnProcessedImageControls.Add(BottomLeftImage);
             ServiceInstance2 = CognitiveServiceBuilder.Create()
+                                   .EnableResultOverlay()
                                    .Build(Dispatcher);
             ServiceInstance2.MessageArea = MessageArea;
-            ServiceInstance2.RightImage = LeftImage;
+            ServiceInstance2.ProcessedImageControls.Add(BottomRightImage);
+            ServiceInstance2.UnProcessedImageControls.Add(TopRightImage);
+            ServiceInstance2.MessageArea = MessageArea2;
+            ServiceInstance2.LatestResultsToDisplay.PropertyChanged += OnFaceRectangleChange;
             ServiceInstance2.SetAppMode(AppMode.LocalDetection);
 
         }
 
         private void OnFaceRectangleChange(object? sender, PropertyChangedEventArgs e)
         {
-            MessageArea.Text = Service.LatestResultsToDisplay.Faces.FirstOrDefault()?.CalculateMouthRectangle()?.X.ToString();
-           
+            //if more than one service instance uses this handler, check if Faces actually has data for each service instance
+            if(Service.LatestResultsToDisplay.Faces.Length > 0)
+                MessageArea.Text = Service.LatestResultsToDisplay.Faces.FirstOrDefault()?.CalculateMouthRectangle()?.X.ToString();
+            if(ServiceInstance2.LatestResultsToDisplay.Faces is not null && ServiceInstance2.LatestResultsToDisplay.Faces.Length>0)
+                MessageArea2.Text = ServiceInstance2.LatestResultsToDisplay.Faces.FirstOrDefault()?.CalculateMouthRectangle()?.X.ToString();
         }
 
 
